@@ -8,7 +8,7 @@ class HiredisConan(ConanFile):
     name = "hiredis"
     version = "0.14.0"
     description = "Minimalistic C client for Redis >= 1.2"
-    topics = ("conan", "nng", "communication", "messaging", "protocols")
+    topics = ("conan", "hiredis", "redis")
     url = "https://github.com/zinnion/conan-hiredis"
     homepage = "https://github.com/redis/hiredis"
     author = "Zinnion <mauro@zinnion.com>"
@@ -25,7 +25,7 @@ class HiredisConan(ConanFile):
     }
 
     default_options = (
-        "shared=False"
+        "shared=True"
     )
 
     def source(self):
@@ -45,6 +45,14 @@ class HiredisConan(ConanFile):
 
     def package(self):
         self.copy(src=self.source_subfolder, pattern="*.h", dst="include", keep_path=False)
+        if self.options.shared:
+            if self.settings.os == "Macos":
+                self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+            else:
+                self.copy(pattern="*.so*", dst="lib", keep_path=False)
+        else:
+            self.copy(pattern="*.a", dst="lib", keep_path=False)
+
         cmake = self.configure_cmake()
         cmake.install()
 
